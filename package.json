@@ -1,0 +1,41 @@
+{
+  "name": "pull-files",
+  "description": "Read and write directories of files with pull-stream",
+  "version": "0.0.0",
+  "homepage": "https://github.com/jamen/pull-files",
+  "author": "Jamen Marz (https://git.io/jamen)",
+  "repository": "jamen/pull-files",
+  "bugs": {
+    "url": "https://github.com/jamen/pull-files/issues"
+  },
+  "license": "MIT",
+  "engines": {
+    "node": ">=4"
+  },
+  "scripts": {
+    "test": "node test",
+    "bench": "node bench"
+  },
+  "dependencies": {
+    "glob-base": "^0.3.0",
+    "micromatch": "^2.3.11",
+    "mkdirp": "^0.5.1",
+    "pull-paramap": "^1.2.2",
+    "pull-pushable": "^2.0.1",
+    "pull-stream": "^3.5.0"
+  },
+  "devDependencies": {
+    "array-difference": "^0.0.1",
+    "benchmark": "^2.1.4",
+    "check-files-exist": "^1.0.1",
+    "diff": "^3.2.0",
+    "nanobench": "^2.1.0",
+    "rimraf": "^2.6.1",
+    "tape": "^4.6.3",
+    "vinyl-fs": "^2.4.4"
+  },
+  "keywords": [
+    "jamen",
+    "pull-files"
+  ]
+}

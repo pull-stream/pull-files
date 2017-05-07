@@ -17,14 +17,18 @@ test('read and write files', function (t) {
       'bar/**.txt',
       'foo/**.{txt,json}',
       '!**/pluto.txt'
-    ], __dirname),
+    ], {
+      cwd: __dirname
+    }),
 
     // Check file objects
     through(function (file) {
-      var name = basename(file.relative, file.relative === 'mars.json' ? '.json' : '.txt')
-      var contents = file.contents.toString()
+      var name = basename(file.path, '.txt')
+      if (name === 'mars.json') name = basename(name, '.json')
 
-      t.is(`hello i am ${name}\n`, contents, name + '\'s contents')
+      var data = file.data.toString()
+      
+      t.is(`hello i am ${name}\n`, data, name + '\'s data')
 
       console.log(file)
     }),
@@ -58,7 +62,7 @@ test('read non existing file', function (t) {
   t.plan(1)
 
   pull(
-    read(['./youhavenotfoundwhatyouwerelookingfor/**.js'], __dirname),
+    read(['./youhavenotfoundwhatyouwerelookingfor/**.js'], { cwd: __dirname }),
     onEnd(err => {
       t.is(err.code, 'ENOENT', 'errors with non-existing files')
     })
@@ -69,11 +73,11 @@ test('read single file', function (t) {
   t.plan(2)
 
   pull(
-    read('bar/pluto.txt', __dirname),
+    read('bar/pluto.txt', { cwd: __dirname }),
     drain(file => {
       console.log(file)
-      t.is(file.relative, 'bar/pluto.txt', 'file path')
-      t.is(file.contents.toString(), 'hello i am pluto\n', 'file contents')
+      t.is(file.path, '/home/jamen/jamen/pull-files/test/bar/pluto.txt', 'file path')
+      t.is(file.data.toString(), 'hello i am pluto\n', 'file data')
     })
   )
 })
@@ -82,7 +86,7 @@ test('read node_modules', function (t) {
   t.plan(1)
 
   pull(
-    read('../node_modules/**/*', __dirname),
+    read('../node_modules/**/*', { cwd: __dirname }),
     collect((err, files) => {
       if (err) throw err
       t.true(files.length, 'reads node modules')
@@ -94,8 +98,8 @@ test('read node_modules', function (t) {
 test('vinyl-fs and pull-stream differences', function (t) {
 
     pull(
-      read('../node_modules/**/*', __dirname),
-      map(x => join(x.base, x.relative)),
+      read('../node_modules/**/*', { cwd: __dirname }),
+      map(({ base, path }) => base ? join(base, path) : path),
       collect((err, p_files) => {
         if (err) throw err
         var v_files = []
@@ -105,12 +109,27 @@ test('vinyl-fs and pull-stream differences', function (t) {
 
           // console.log(v_files)
           // console.log(p_files)
-          console.log(diff(v_files, p_files).length)
+          // console.log(diff(v_files, p_files).length)
           t.end()
 
         })
       })
     )
+
+})
+
+test('stream mode', t => {
+  t.plan(4)
+  
+  pull(
+    read('foo/**/*', { cwd: __dirname, stream: true }),
+    drain(file => {
+      t.is(typeof file.data, 'function', 'got stream data')
+    }, err => {
+      if (err) return t.end(err)
+      else t.pass('finished')
+    })
+  )
 
 })
 

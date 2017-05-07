@@ -4,11 +4,13 @@ var { src, dest } = require('vinyl-fs')
 var { read, write } = require('../')
 var bench = require('nanobench')
 
+var opts = { cwd: __dirname }
+
 bench('pull-files reading', b => {
 
   b.start()
   pull(
-    read('../node_modules/**/*', __dirname),
+    read('../node_modules/**/*', opts),
     collect((err, files) => {
       b.end()
       console.log('read', files.length, 'files')
@@ -18,7 +20,6 @@ bench('pull-files reading', b => {
 })
 
 
-var opts = { cwd: __dirname }
 bench('vinyl-fs reading', b => {
 
   b.start()

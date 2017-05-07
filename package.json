@@ -18,6 +18,7 @@
   },
   "dependencies": {
     "glob-base": "^0.3.0",
+    "is-absolute": "^0.2.6",
     "micromatch": "^2.3.11",
     "mkdirp": "^0.5.1",
     "pull-paramap": "^1.2.2",

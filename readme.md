@@ -12,7 +12,7 @@ pull(
 
   // Compile files' contents
   pull.through(file => {
-    file.contents = compile(file.contents)
+    file.data = compile(file.data)
   }),
 
   // Write them to `out` directory
@@ -24,10 +24,10 @@ pull(
 
 The file objects are a minimal take on [`Vinyl`](https://github.com/gulpjs/vinyl) containing only properties that are necessary:
 
-```js
+```
 { base: '/home/jamen/jamen/pull-files/test',
-  relative: 'bar/pluto.txt',
-  contents: <Buffer 68 65 6c 6c 6f 20 69 20 61 6d 20 70 6c 75 74 6f 0a> }
+  path: 'bar/pluto.txt',
+  data: <Buffer 68 65 6c 6c 6f 20 69 20 61 6d 20 70 6c 75 74 6f 0a> }
 ```
 
 This lets you create them without any dependencies, and you may also add custom properties not concerned with this module
@@ -40,14 +40,19 @@ npm install --save pull-files
 
 ## Usage
 
-### `read(glob, cwd?)`
+### `read(glob, options?)`
 
 Read files from a glob or path (or arrays of either) using [`micromatch`](https://github.com/micromatch/micromatch) patterns.  Supply `cwd` if your paths are relative and will change depending on where you execute `node` (most likely want `__dirname`)
+
+Options can contain:
+
+ - `cwd`: Used to resolve relative paths (commonly set as `__dirname`)
+ - `stream`: Enable stream mode, where `file.data` is a source stream
 
 ```js
 pull(
   // Read js files from node_modules, excluding pull-files directory
-  read([ 'node_modules/**/*.js', '!node_modules/pull-files' ], __dirname),
+  read([ 'node_modules/**/*.js', '!node_modules/pull-files' ], { cwd: __dirname }),
   drain(file => console.log(file))
 )
 ```
@@ -59,9 +64,9 @@ Write files to `dest` and calls `done(err?)` when finished
 ```js
 pull(
   values([
-    { base: 'foo', relative: 'earth.js', contents: 'hello earth' },
-    { base: 'foo', relative: 'mars.js', contents: 'hello mars' },
-    { base: 'baz', relative: 'pluto.js', contents: 'hello pluto' },
+    { path: 'earth.js', data: 'hello earth' },
+    { path: 'mars.js', data: 'hello mars' },
+    { path: 'pluto.js', data: 'hello pluto' },
   ]),
 
   write('example', err => {
@@ -70,23 +75,21 @@ pull(
 )
 ```
 
-Here you can see that files don't have to be created from `read` either, but can be from anywhere
+Here you can see that files don't have to be created from `read` either, but can be from anywhere.  Nor do you have to provide `base` for unglobbed files.
 
-### `{ base, relative, contents }`
+### `{ base, path, data }`
 
-Files are represented as plain objects with the properties:
+These Represent files, where:
 
- - `base`: The base path of the file.  Typically where the globbing started
- - `relative`: The file's path relative to `base`.  So you can retain directory structure
- - `contents`: A buffer of the file's contents
+ - `base` is an optional property present if `path` is relative.  It allows you to retain directory structure and move the base (e.g. to an `out/` folder if you're compiling)
+ - `path`: The path of the data.  Either absolute or relative.  If absolute, `base` will be `null`.
+ - `data`: A buffer or stream of the file's data.
 
-If you want to get a file's full path, simple do:
+For a simple way to get a file's full path, regardless of relativity, do:
 
 ```js
-var file_path = path.join(file.base, file.relative)
+var full = base ? join(base, path) : path
 ```
-
-You can also stick this on `file.path` if you want to.  But be careful about mutating `base`/`relative` afterwards!
 
 ---
 

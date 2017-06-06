@@ -151,8 +151,9 @@ function read (globs, options) {
 }
 
 function write (new_base, done) {
-  if (typeof base === 'function') {
-    done = base
+  if (typeof new_base === 'function') {
+    done = new_base
+    new_base = null
   }
 
   const written_dirs = []
